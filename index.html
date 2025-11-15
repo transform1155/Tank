@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>坦克大战 - 经典战争游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2f1a 0%, #2d4a2d 100%);
+            color: #e0e0e0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 头部样式 */
+        header {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo h1 {
+            color: #4CAF50;
+            font-size: 28px;
+            margin-left: 10px;
+            text-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .logo-icon:before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 8px;
+            background-color: #333;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+            position: relative;
+        }
+        
+        nav ul li a:hover {
+            color: #4CAF50;
+        }
+        
+        nav ul li a:after {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background-color: #4CAF50;
+            bottom: -5px;
+            left: 0;
+            transition: width 0.3s;
+        }
+        
+        nav ul li a:hover:after {
+            width: 100%;
+        }
+        
+        /* 英雄区域样式 */
+        .hero {
+            padding: 180px 0 100px;
+            text-align: center;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%231a2f1a"/><path d="M0,0 L100,100 M100,0 L0,100" stroke="%232d4a2d" stroke-width="1"/></svg>');
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 50%, rgba(76, 175, 80, 0.1) 0%, transparent 50%);
+        }
+        
+        .hero h2 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hero p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            color: #c0c0c0;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .cta-button:active {
+            transform: translateY(1px);
+        }
+        
+        .tank-animation {
+            margin-top: 50px;
+            height: 100px;
+            position: relative;
+        }
+        
+        .tank {
+            width: 80px;
+            height: 40px;
+            background-color: #4CAF50;
+            border-radius: 10px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: tankMove 8s infinite;
+        }
+        
+        .tank:before {
+            content: "";
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background-color: #388E3C;
+            border-radius: 5px;
+            top: -15px;
+            left: 10px;
+        }
+        
+        .tank:after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 8px;
+            background-color: #333;
+            top: 50%;
+            right: -15px;
+            transform: translateY(-50%);
+        }
+        
+        .tank-track {
+            position: absolute;
+            width: 90px;
+            height: 15px;
+            background-color: #333;
+            bottom: -5px;
+            left: -5px;
+            border-radius: 3px;
+        }
+        
+        @keyframes tankMove {
+            0% { left: 10%; }
+            50% { left: 90%; }
+            100% { left: 10%; }
+        }
+        
+        /* 游戏特色区域 */
+        .features {
+            padding: 100px 0;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+            font-size: 36px;
+            color: #4CAF50;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: "";
+            position: absolute;
+            width: 80px;
+            height: 3px;
+            background-color: #4CAF50;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background-color: rgba(76, 175, 80, 0.2);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #4CAF50;
+        }
+        
+        .feature-card h3 {
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        /* 视频展示区域 */
+        .video-showcase {
+            padding: 100px 0;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .video-container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .video-player {
+            width: 100%;
+            display: block;
+            background-color: #000;
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(135deg, #2d4a2d 0%, #1a2f1a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            position: relative;
+        }
+        
+        .video-placeholder:before {
+            content: "🎮 坦克大战游戏预告片";
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .video-placeholder:after {
+            content: "点击播放按钮观看游戏视频";
+            font-size: 16px;
+        }
+        
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background-color: rgba(76, 175, 80, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .play-button:hover {
+            background-color: rgba(76, 175, 80, 1);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+        
+        .play-button:after {
+            content: "";
+            width: 0;
+            height: 0;
+            border-left: 20px solid white;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            margin-left: 5px;
+        }
+        
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .video-container:hover .video-controls {
+            opacity: 1;
+        }
+        
+        .control-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            margin-right: 15px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .progress-bar {
+            flex-grow: 1;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            margin: 0 15px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .progress {
+            position: absolute;
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 3px;
+            width: 0%;
+        }
+        
+        .time-display {
+            color: white;
+            font-size: 14px;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        /* 截图区域 */
+        .screenshots {
+            padding: 100px 0;
+        }
+        
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .screenshot {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+            background-color: #2d4a2d;
+            height: 200px;
+            position: relative;
+        }
+        
+        .screenshot:hover {
+            transform: scale(1.05);
+        }
+        
+        .screenshot:before {
+            content: "游戏截图";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #aaa;
+            font-size: 18px;
+        }
+        
+        /* 下载区域 */
+        .download {
+            padding: 100px 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        .download-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .download-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 40px 0;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #4CAF50;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 16px;
+            color: #aaa;
+        }
+        
+        .download-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+            padding: 18px 50px;
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .download-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .file-info {
+            margin-top: 20px;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        /* 页脚样式 */
+        footer {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 50px 0 20px;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            margin: 20px 0;
+        }
+        
+        .footer-links a {
+            color: #aaa;
+            margin: 0 15px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #4CAF50;
+        }
+        
+        .copyright {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+            }
+            
+            nav ul {
+                margin-top: 20px;
+            }
+            
+            nav ul li {
+                margin: 0 10px;
+            }
+            
+            .hero h2 {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+            
+            .section-title {
+                font-size: 28px;
+            }
+            
+            .download-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .video-placeholder {
+                height: 300px;
+            }
+            
+            .play-button {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .play-button:after {
+                border-left: 15px solid white;
+                border-top: 9px solid transparent;
+                border-bottom: 9px solid transparent;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon"></div>
+                    <h1>坦克大战</h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#home">首页</a></li>
+                        <li><a href="#features">游戏特色</a></li>
+                        <li><a href="#video">视频展示</a></li>
+                        <li><a href="#screenshots">游戏截图</a></li>
+                        <li><a href="#download">下载</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="hero" id="home">
+        <div class="container">
+            <h2>经典坦克大战 重装上阵</h2>
+            <p>体验最刺激的坦克对战游戏，在硝烟弥漫的战场上展现你的战略与技巧！多种坦克选择，丰富关卡设计，带你重温经典游戏乐趣。</p>
+            <a href="#download" class="cta-button">立即下载</a>
+            <div class="tank-animation">
+                <div class="tank">
+                    <div class="tank-track"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 游戏特色 -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">游戏特色</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚔️</div>
+                    <h3>激烈对战</h3>
+                    <p>与AI或其他玩家展开激烈坦克对战，体验真实的战场氛围。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎮</div>
+                    <h3>多种模式</h3>
+                    <p>包含单人战役、生存模式、多人对战等多种游戏模式。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>升级系统</h3>
+                    <p>通过战斗获取经验，升级你的坦克，解锁更强武器和装备。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>多样地图</h3>
+                    <p>多种战场环境，从沙漠到雪地，每张地图都有独特战术。</p>
+                </div>
+                 <div class="feature-card">
+                    <div class="feature-icon">😊</div>
+                    <h3>关于开发者</h3>
+                    <p>这款游戏我开发前后大概有几个月了，由于时间关系网络部分并没有完善。所以不能联机。网站下面有介绍视频。是我自己录得，自己剪辑的。我会保持每两周更新</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 视频展示区域 -->
+    <section class="video-showcase" id="video">
+        <div class="container">
+            <h2 class="section-title">游戏视频</h2>
+            <div class="video-container">
+                <div class="video-placeholder" id="videoPlaceholder">
+                    <div class="play-button" id="playButton"></div>
+                </div>
+                <video class="video-player" id="gameVideo" controls style="display:none;">
+                    <!-- 这里可以替换为实际的视频URL -->
+                    <source src="Tankvideo.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+                <div class="video-controls">
+                    <button class="control-button" id="playPauseBtn">▶️</button>
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress" id="progress"></div>
+                    </div>
+                    <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+                    <button class="control-button" id="muteBtn">🔊</button>
+                    <button class="control-button" id="fullscreenBtn">⛶</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 游戏截图 -->
+    <section class="screenshots" id="screenshots">
+        <div class="container">
+            <h2 class="section-title">游戏截图</h2>
+            <div class="screenshots-grid">
+                <div class="screenshot"></div>
+                <div class="screenshot"></div>
+                <div class="screenshot"></div>
+                <div class="screenshot"></div>
+                <div class="screenshot"></div>
+                <div class="screenshot"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 下载区域 -->
+    <section class="download" id="download">
+        <div class="container">
+            <div class="download-content">
+                <h2 class="section-title">立即下载</h2>
+                <p>加入数百万玩家，体验最刺激的坦克对战游戏！</p>
+                
+                <div class="download-stats">
+                    <div class="stat">
+                        <span class="stat-number">500万+</span>
+                        <span class="stat-label">下载量</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">4.8</span>
+                        <span class="stat-label">用户评分</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100+</span>
+                        <span class="stat-label">游戏关卡</span>
+                    </div>
+                </div>
+                
+                <a href="Tank.zip" class="download-button" download>下载 Tank.apk</a>
+                <p><a href="Tank/web/index.html">本文本</a> 是一个指向万维网上的页面的链接。</p>
+                <div class="file-info">文件大小: 85MB | 版本: 2.1.0 | 更新日期: 2025-10-15</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="logo">
+                    <div class="logo-icon"></div>
+                    <h1>坦克大战</h1>
+                </div>
+                <div class="footer-links">
+                    <a href="#">隐私政策</a>
+                    <a href="#">用户协议</a>
+                    <a href="#">联系我们</a>
+                    <a href="#">关于我们</a>
+                </div>
+                <div class="copyright">
+                    &copy; 2025 坦克大战游戏工作室. 保留所有权利.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 简单的滚动效果
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            });
+        });
+        
+        // 下载按钮点击事件
+        document.querySelector('.download-button').addEventListener('click', function() {
+            alert('感谢下载！如果下载没有自动开始，请右键链接并选择"另存为"。');
+        });
+        
+        // 视频播放功能
+        const videoPlaceholder = document.getElementById('videoPlaceholder');
+        const playButton = document.getElementById('playButton');
+        const gameVideo = document.getElementById('gameVideo');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progress = document.getElementById('progress');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const muteBtn = document.getElementById('muteBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        
+        // 点击播放按钮
+        playButton.addEventListener('click', function() {
+            videoPlaceholder.style.display = 'none';
+            gameVideo.style.display = 'block';
+            gameVideo.play();
+            playPauseBtn.textContent = '⏸️';
+        });
+        
+        // 播放/暂停按钮
+        playPauseBtn.addEventListener('click', function() {
+            if (gameVideo.paused) {
+                gameVideo.play();
+                playPauseBtn.textContent = '⏸️';
+            } else {
+                gameVideo.pause();
+                playPauseBtn.textContent = '▶️';
+            }
+        });
+        
+        // 更新进度条
+        gameVideo.addEventListener('timeupdate', function() {
+            const percent = (gameVideo.currentTime / gameVideo.duration) * 100;
+            progress.style.width = percent + '%';
+            
+            // 更新时间显示
+            const currentMinutes = Math.floor(gameVideo.currentTime / 60);
+            const currentSeconds = Math.floor(gameVideo.currentTime % 60);
+            const durationMinutes = Math.floor(gameVideo.duration / 60);
+            const durationSeconds = Math.floor(gameVideo.duration % 60);
+            
+            timeDisplay.textContent = 
+                `${currentMinutes}:${currentSeconds < 10 ? '0' : ''}${currentSeconds} / ${durationMinutes}:${durationSeconds < 10 ? '0' : ''}${durationSeconds}`;
+        });
+        
+        // 点击进度条跳转
+        progressBar.addEventListener('click', function(e) {
+            const pos = (e.pageX - this.offsetLeft) / this.offsetWidth;
+            gameVideo.currentTime = pos * gameVideo.duration;
+        });
+        
+        // 静音按钮
+        muteBtn.addEventListener('click', function() {
+            gameVideo.muted = !gameVideo.muted;
+            muteBtn.textContent = gameVideo.muted ? '🔇' : '🔊';
+        });
+        
+        // 全屏按钮
+        fullscreenBtn.addEventListener('click', function() {
+            if (gameVideo.requestFullscreen) {
+                gameVideo.requestFullscreen();
+            } else if (gameVideo.mozRequestFullScreen) {
+                gameVideo.mozRequestFullScreen();
+            } else if (gameVideo.webkitRequestFullscreen) {
+                gameVideo.webkitRequestFullscreen();
+            } else if (gameVideo.msRequestFullscreen) {
+                gameVideo.msRequestFullscreen();
+            }
+        });
+        
+        // 视频结束时重置
+        gameVideo.addEventListener('ended', function() {
+            playPauseBtn.textContent = '▶️';
+        });
+    </script>
+</body>
+</html>
